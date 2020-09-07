@@ -6,7 +6,14 @@ router.route("/add").post((req, res) => {
   const title = req.body.title;
   const description = req.body.description;
   const contact = req.body.contact;
-  const newOfficer = new Officer({ name, title, description, contact });
+  const imageUrl = req.body.imageUrl;
+  const newOfficer = new Officer({
+    name,
+    title,
+    description,
+    contact,
+    imageUrl,
+  });
   newOfficer
     .save()
     .then(() => res.json("Officer Added"))
@@ -33,6 +40,7 @@ router.route("/update/:id").post((req, res) => {
       officer.title = req.body.title;
       officer.description = req.body.description;
       officer.contact = req.body.contact;
+      officer.imageUrl = req.body.imageUrl;
       officer
         .save()
         .then(() => res.json("Officer Updated"))

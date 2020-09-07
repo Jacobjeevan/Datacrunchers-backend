@@ -18,6 +18,10 @@ const officerSchema = new Schema({
     type: String,
     required: true,
   },
+  imageUrl: {
+    type: String,
+    required: true,
+  },
 });
 
 const Officer = mongoose.model("Officer", officerSchema);
