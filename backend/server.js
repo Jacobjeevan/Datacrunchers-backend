@@ -2,9 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const jwt = require("express-jwt");
-const jwtAuthz = require("express-jwt-authz");
-const jwksRsa = require("jwks-rsa");
+
 const officerRouter = require("./routes/officer");
 const eventRouter = require("./routes/event");
 const projectRouter = require("./routes/project");
@@ -22,26 +20,6 @@ app.use("/projects", projectRouter);
 app.use("/events", eventRouter);
 app.use("/resources", resourceRouter);
 app.use("/careers", careerRouter);
-
-// Authentication middleware. When used, the
-// Access Token must exist and be verified against
-// the Auth0 JSON Web Key Set
-const checkJwt = jwt({
-  // Dynamically provide a signing key
-  // based on the kid in the header and
-  // the signing keys provided by the JWKS endpoint.
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: process.env.jwksUri,
-  }),
-
-  // Validate the audience and the issuer.
-  audience: process.env.audience,
-  issuer: process.env.issuer,
-  algorithms: ["RS256"],
-});
 
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {
