@@ -3,7 +3,20 @@ let Officer = require("../models/officer");
 const multer = require("multer");
 const AWS = require("aws-sdk");
 const fs = require("fs");
+const checkJwt = require("../auth");
 require("dotenv").config();
+
+router.use("/add", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/update/:id", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/delete/:id", checkJwt, function (req, res, next) {
+  next();
+});
 
 const storage = multer.diskStorage({
   destination: "uploads/",
@@ -21,7 +34,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-router.route("/add", upload.single("headshot")).post((req, res) => {
+router.route("/add", checkJwt, upload.single("headshot")).post((req, res) => {
   const name = req.body.name;
   const title = req.body.title;
   const description = req.body.description;
@@ -112,7 +125,7 @@ router.route("/:id").get((req, res) => {
     .catch((err) => res.status(400).json("Officer Fetch Error: " + err));
 });
 
-router.route("/update/:id").post((req, res) => {
+router.route("/update/:id", checkJwt).post((req, res) => {
   Officer.findById(req.params.id)
     .then((officer) => {
       officer.name = req.body.name;
@@ -128,7 +141,7 @@ router.route("/update/:id").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/:id").delete((req, res) => {
+router.route("/delete/:id", checkJwt).delete((req, res) => {
   Officer.findByIdAndDelete(req.params.id)
     .then(() => res.json("Officer deleted"))
     .catch((err) => res.status(400).json("Error: " + err));

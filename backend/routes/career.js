@@ -1,5 +1,18 @@
 const router = require("express").Router();
 const Career = require("../models/career");
+const checkJwt = require("../auth");
+
+router.use("/add", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/update/:id", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/delete/:id", checkJwt, function (req, res, next) {
+  next();
+});
 
 router.route("/add").post((req, res) => {
   const title = req.body.title;
@@ -41,7 +54,7 @@ router.route("/update/:id").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/:id").delete((req, res) => {
+router.route("/delete/:id").delete((req, res) => {
   Career.findByIdAndDelete(req.params.id)
     .then(() => res.json("Career deleted"))
     .catch((err) => res.status(400).json("Error: " + err));

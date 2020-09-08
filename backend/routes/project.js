@@ -1,7 +1,20 @@
 const router = require("express").Router();
 const Project = require("../models/project");
+const checkJwt = require("../auth");
 
-router.route("/add").post((req, res) => {
+router.use("/add", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/update/:id", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.use("/delete/:id", checkJwt, function (req, res, next) {
+  next();
+});
+
+router.route("/add", checkJwt).post((req, res) => {
   const authors = req.body.authors;
   const title = req.body.title;
   const description = req.body.description;
@@ -13,7 +26,7 @@ router.route("/add").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/").get((req, res) => {
+router.get("/", function (req, res) {
   Project.find()
     .then((projects) => res.json(projects))
     .catch((err) => res.status(400).json("Error: " + err));
@@ -26,7 +39,7 @@ router.route("/:id").get((req, res) => {
     .catch((err) => res.status(400).json("Project Fetch Error: " + err));
 });
 
-router.route("/update/:id").post((req, res) => {
+router.route("/update/:id", checkJwt).post((req, res) => {
   Project.findById(req.params.id)
     .then((project) => {
       project.authors = req.body.authors;
@@ -41,7 +54,7 @@ router.route("/update/:id").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/:id").delete((req, res) => {
+router.route("/delete/:id", checkJwt).delete((req, res) => {
   Project.findByIdAndDelete(req.params.id)
     .then(() => res.json("Project deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
