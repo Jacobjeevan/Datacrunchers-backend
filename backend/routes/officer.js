@@ -38,7 +38,7 @@ router.route("/add", checkJwt, upload.single("headshot")).post((req, res) => {
   const name = req.body.name;
   const title = req.body.title;
   const description = req.body.description;
-  const contact = req.body.contact;
+  const email = req.body.email;
   const imageName = req.file.filename;
   const uploadRes = uploadFile(req.file.path, imageName);
   if (uploadRes === false) {
@@ -48,7 +48,7 @@ router.route("/add", checkJwt, upload.single("headshot")).post((req, res) => {
     name,
     title,
     description,
-    contact,
+    email,
     imageName,
   });
   newOfficer
@@ -131,7 +131,7 @@ router.route("/update/:id", checkJwt).post((req, res) => {
       officer.name = req.body.name;
       officer.title = req.body.title;
       officer.description = req.body.description;
-      officer.contact = req.body.contact;
+      officer.email = req.body.email;
       officer.imageName = req.body.imageName;
       officer
         .save()

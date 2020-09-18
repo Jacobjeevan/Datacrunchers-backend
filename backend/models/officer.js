@@ -14,11 +14,11 @@ const officerSchema = new Schema({
     type: String,
     required: true,
   },
-  contact: {
+  email: {
     type: String,
     required: true,
   },
-  imageUrl: {
+  imageName: {
     type: String,
     required: true,
   },
