@@ -1,16 +1,18 @@
 const router = require("express").Router();
 const Event = require("../models/event");
 const checkJwt = require("../auth");
+const jwtAuthz = require("express-jwt-authz");
+const checkScopes = jwtAuthz(["all:events"]);
 
-router.use("/add", checkJwt, function (req, res, next) {
+router.use("/add", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, function (req, res, next) {
+router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, function (req, res, next) {
+router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 

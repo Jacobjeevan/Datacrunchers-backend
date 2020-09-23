@@ -1,25 +1,25 @@
 const router = require("express").Router();
 const Career = require("../models/career");
 const checkJwt = require("../auth");
+const jwtAuthz = require("express-jwt-authz");
+const checkScopes = jwtAuthz(["all:careers"]);
 
-router.use("/add", checkJwt, function (req, res, next) {
+router.use("/add", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, function (req, res, next) {
+router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, function (req, res, next) {
+router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
 router.route("/add").post((req, res) => {
   const title = req.body.title;
   const description = req.body.description;
-  const location = req.body.location;
-  const date = Date.parse(req.body.date);
-  const newCareer = new Career({ title, description, location, date });
+  const newCareer = new Career({ title, description });
   newCareer
     .save()
     .then(() => res.json("Career Added"))
@@ -44,8 +44,6 @@ router.route("/update/:id").post((req, res) => {
     .then((career) => {
       career.title = req.body.title;
       career.description = req.body.description;
-      career.location = req.body.location;
-      career.date = Date.parse(req.body.date);
       career
         .save()
         .then(() => res.json("Career Updated"))

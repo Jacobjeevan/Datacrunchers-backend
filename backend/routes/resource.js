@@ -1,25 +1,25 @@
 const router = require("express").Router();
 const Resource = require("../models/resource");
 const checkJwt = require("../auth");
+const jwtAuthz = require("express-jwt-authz");
+const checkScopes = jwtAuthz(["all:events"]);
 
-router.use("/add", checkJwt, function (req, res, next) {
+router.use("/add", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, function (req, res, next) {
+router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, function (req, res, next) {
+router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
 router.route("/add").post((req, res) => {
   const title = req.body.title;
   const description = req.body.description;
-  const location = req.body.location;
-  const date = Date.parse(req.body.date);
-  const newResource = new Resource({ title, description, location, date });
+  const newResource = new Resource({ title, description });
   newResource
     .save()
     .then(() => res.json("Resource Added"))
@@ -44,8 +44,6 @@ router.route("/update/:id").post((req, res) => {
     .then((resource) => {
       resource.title = req.body.title;
       resource.description = req.body.description;
-      resource.location = req.body.location;
-      resource.date = Date.parse(req.body.date);
       resource
         .save()
         .then(() => res.json("Resource Updated"))

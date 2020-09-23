@@ -4,17 +4,19 @@ const multer = require("multer");
 const AWS = require("aws-sdk");
 const fs = require("fs");
 const checkJwt = require("../auth");
+const jwtAuthz = require("express-jwt-authz");
+const checkScopes = jwtAuthz(["all:officers"]);
 require("dotenv").config();
 
-router.use("/add", checkJwt, function (req, res, next) {
+router.use("/add", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, function (req, res, next) {
+router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, function (req, res, next) {
+router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
   next();
 });
 
