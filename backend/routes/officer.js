@@ -7,6 +7,15 @@ const checkJwt = require("../auth");
 const jwtAuthz = require("express-jwt-authz");
 const checkScopes = jwtAuthz(["all:officers"]);
 require("dotenv").config();
+var upload = multer({ storage: multer.memoryStorage() });
+
+AWS.config.update({
+  accessKeyId: process.env.Access_Key_ID,
+  secretAccessKey: process.env.Secret_Access_Key,
+  region: process.env.bucketregion,
+});
+
+const s3 = new AWS.S3();
 
 router.use("/add", checkJwt, checkScopes, function (req, res, next) {
   next();
@@ -26,122 +35,74 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
-const upload = multer({ storage: storage });
 
-AWS.config.update({
-  accessKeyId: process.env.Access_Key_ID,
-  secretAccessKey: process.env.Secret_Access_Key,
-  region: process.env.bucketregionregion,
-});
+router.post("/add", upload.single("imageName"), (req, res) => {
+  const file = req.file;
+  var params = {
+    Bucket: process.env.bucketname,
+    Body: file.buffer,
+    Key: file.originalname,
+    ContentType: file.mimetype,
+    ACL: "public-read",
+  };
 
-const s3 = new AWS.S3();
-
-router.route("/add", checkJwt, upload.single("headshot")).post((req, res) => {
-  const name = req.body.name;
-  const title = req.body.title;
-  const description = req.body.description;
-  const email = req.body.email;
-  const imageName = req.file.filename;
-  const uploadRes = uploadFile(req.file.path, imageName);
-  if (uploadRes === false) {
-    res.status(400).json("Image upload Error");
-  }
-  const newOfficer = new Officer({
-    name,
-    title,
-    description,
-    email,
-    imageName,
-  });
-  newOfficer
-    .save()
-    .then(() => res.json("Officer Added"))
-    .catch((err) => res.status(400).json("Error: " + err));
-});
-
-function uploadFile(source, targetName) {
-  fs.readFile(source, function (err, filedata) {
-    if (!err) {
-      const putParams = {
-        Bucket: process.env.bucketregion,
-        Key: targetName,
-        Body: filedata,
-      };
-      s3.putObject(putParams, function (err, data) {
-        if (err) {
-          return false;
-        } else {
-          fs.unlink(source);
-          return true;
-        }
-      });
+  s3.upload(params, function (err, data) {
+    if (err) {
+      return;
     } else {
-      console.log({ err: err });
-      return false;
+      const newOfficer = new Officer({
+        name: req.body.name,
+        title: req.body.title,
+        description: req.body.description,
+        email: req.body.email,
+        imageDest: data.Location,
+      });
+      newOfficer
+        .save()
+        .then((res) => res.json("Officer Added"))
+        .catch((err) => res.status(400).json("Officer Save Error: " + err));
     }
   });
-}
+  res.status(400).json("S3 Upload Error");
+});
 
 router.route("/").get((req, res) => {
   Officer.find()
-    .then((officers) => {
-      officers.map(function callback(officer) {
-        officer.image = retrieveFile(officer.imageName);
-        if (officer.image === false) {
-          res.status(400).json("Image retrieval Error");
-        } else {
-          return officer;
-        }
-      });
-
-      res.json(officers);
-    })
+    .then((officers) => res.json(officers))
     .catch((err) => res.status(400).json("Error: " + err));
 });
-
-function retrieveFile(filename) {
-  const getParams = {
-    Bucket: process.env.bucketregion,
-    Key: filename,
-  };
-
-  s3.getObject(getParams, function (err, data) {
-    if (err) {
-      return false;
-    } else {
-      return data.Body;
-    }
-  });
-}
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
   Officer.findById(id)
-    .then((officer) => {
-      officer.image = retrieveFile(officer.imageName);
-      if (officer.image === false) {
-        res.status(400).json("Image retrieval Error");
-      }
-      res.json(officer);
-    })
-    .catch((err) => res.status(400).json("Officer Fetch Error: " + err));
-});
-
-router.route("/update/:id", checkJwt).post((req, res) => {
-  Officer.findById(req.params.id)
-    .then((officer) => {
-      officer.name = req.body.name;
-      officer.title = req.body.title;
-      officer.description = req.body.description;
-      officer.email = req.body.email;
-      officer.imageName = req.body.imageName;
-      officer
-        .save()
-        .then(() => res.json("Officer Updated"))
-        .catch((err) => res.status(400).json("Error: " + err));
-    })
+    .then((officer) => res.json(officer))
     .catch((err) => res.status(400).json("Error: " + err));
 });
+
+router
+  .route("/update/:id", upload.single("imageName"), checkJwt)
+  .post((req, res) => {
+    Officer.findById(req.params.id)
+      .then((officer) => {
+        officer.name = req.body.name;
+        officer.title = req.body.title;
+        officer.description = req.body.description;
+        officer.email = req.body.email;
+        imageName = req.body.imageName;
+        if (imageName) {
+          imageDest = uploadFile(req.file.path, imageName);
+          if (imageDest === false) {
+            res.status(400).json("Image upload Error");
+          }
+          officer.imageDest = imageDest;
+        }
+        officer
+          .save()
+          .then(() => res.json("Officer Updated"))
+          .catch((err) => res.status(400).json("Error: " + err));
+      })
+      .catch((err) => res.status(400).json("Error: " + err));
+  });
 
 router.route("/delete/:id", checkJwt).delete((req, res) => {
   Officer.findByIdAndDelete(req.params.id)
