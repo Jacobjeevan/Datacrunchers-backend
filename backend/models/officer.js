@@ -18,7 +18,7 @@ const officerSchema = new Schema({
     type: String,
     required: true,
   },
-  imageName: {
+  imageDest: {
     type: String,
     required: true,
   },
