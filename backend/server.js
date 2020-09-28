@@ -8,7 +8,12 @@ const express = require("express"),
   User = require("./models/user");
 
 var MongoDBStore = require("connect-mongodb-session")(session);
-require("dotenv").config();
+
+if (process.env.NODE_ENV == "PRODUCTION") {
+  require("dotenv").config({ path: "./.env.prod" });
+} else if (process.env.NODE_ENV == "DEV") {
+  require("dotenv").config({ path: "./.env.dev" });
+}
 
 const officerRouter = require("./routes/officer");
 const eventRouter = require("./routes/event");
