@@ -7,6 +7,7 @@ const express = require("express"),
   LocalStrategy = require("passport-local").Strategy,
   User = require("./models/user");
 
+var MongoDBStore = require("connect-mongodb-session")(session);
 require("dotenv").config();
 
 const officerRouter = require("./routes/officer");
@@ -22,6 +23,34 @@ const port = process.env.PORT || 5000;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+var store = new MongoDBStore({
+  uri: process.env.Session_mongo_URI,
+  databaseName: process.env.Session_DB_NAME,
+  collection: process.env.Session_collection,
+  connectionOptions: {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 10000,
+  },
+});
+
+// Catch errors
+store.on("error", function (error) {
+  console.log(error);
+});
+
+app.use(
+  require("express-session")({
+    secret: process.env.Session_Secret,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
+    store: store,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
