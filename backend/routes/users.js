@@ -18,7 +18,7 @@ router.post("/register", (req, res) => {
       console.log("Registration Error: " + err);
       return res.status(500).json({ error: err });
     } else {
-      return res.json({ user: user });
+      return res.json(user);
     }
   });
 });
@@ -27,7 +27,9 @@ router.post(
   "/login",
   passport.authenticate("local", { failWithError: true }),
   function (req, res) {
-    if (req.isAuthenticated()) res.json(req.user);
+    if (req.isAuthenticated()) {
+      res.json(req.user);
+    }
   }
 );
 
