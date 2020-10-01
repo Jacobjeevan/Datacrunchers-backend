@@ -1,25 +1,17 @@
-const jwt = require("express-jwt");
-const jwksRsa = require("jwks-rsa");
-require("dotenv").config();
+const User = require("./models/user");
 
-// Authentication middleware. When used, the
-// Access Token must exist and be verified against
-// the Auth0 JSON Web Key Set
-const checkJwt = jwt({
-  // Dynamically provide a signing key
-  // based on the kid in the header and
-  // the signing keys provided by the JWKS endpoint.
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: process.env.jwksUri,
-  }),
+const checkUserPermissions = (req, res, next) => {
+  if (req.session.user) {
+    let foundUser = User.findById({ _id: req.session.user._id });
+    if (foundUser /* && foundUser.Role == "officer" */) {
+      return next();
+    } else {
+      return res.status(400).json({
+        error: "User does not have appropriate permissions for this action",
+      });
+    }
+  }
+  return res.status(404).json({ error: "User not found" });
+};
 
-  // Validate the audience and the issuer.
-  audience: process.env.audience,
-  issuer: process.env.issuer,
-  algorithms: ["RS256"],
-});
-
-module.exports = checkJwt;
+module.exports = checkUserPermissions;

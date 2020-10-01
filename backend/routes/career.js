@@ -1,18 +1,16 @@
 const router = require("express").Router();
 const Career = require("../models/career");
-const checkJwt = require("../auth");
-const jwtAuthz = require("express-jwt-authz");
-const checkScopes = jwtAuthz(["all:careers"]);
+const checkUserPermissions = require("../auth");
 
-router.use("/add", checkJwt, checkScopes, function (req, res, next) {
+router.use("/add", checkUserPermissions, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
+router.use("/update/:id", checkUserPermissions, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
+router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
   next();
 });
 
