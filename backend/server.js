@@ -26,7 +26,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(helmet());
-app.use(cors());
+
+const corsOptions = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 var store = new MongoDBStore({
@@ -45,17 +51,22 @@ store.on("error", function (error) {
   console.log(error);
 });
 
-app.use(
-  require("express-session")({
-    secret: process.env.Session_Secret,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-    },
-    store: store,
-    resave: true,
-    saveUninitialized: true,
-  })
-);
+let sess = {
+  secret: process.env.Session_Secret,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+  },
+  name: process.env.Session,
+  store: store,
+  resave: true,
+  saveUninitialized: false,
+};
+
+if (process.env.NODE_ENV == "PRODUCTION") {
+  sess.cookie.secure = true;
+}
+
+app.use(require("express-session")(sess));
 
 app.use(passport.initialize());
 app.use(passport.session());
