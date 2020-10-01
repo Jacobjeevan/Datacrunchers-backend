@@ -2,10 +2,7 @@ const router = require("express").Router();
 let Officer = require("../models/officer");
 const multer = require("multer");
 const AWS = require("aws-sdk");
-const fs = require("fs");
-const checkJwt = require("../auth");
-const jwtAuthz = require("express-jwt-authz");
-const checkScopes = jwtAuthz(["all:officers"]);
+const checkUserPermissions = require("../auth");
 require("dotenv").config();
 var upload = multer({ storage: multer.memoryStorage() });
 
@@ -17,15 +14,15 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-router.use("/add", checkJwt, checkScopes, function (req, res, next) {
+router.use("/add", checkUserPermissions, function (req, res, next) {
   next();
 });
 
-router.use("/update/:id", checkJwt, checkScopes, function (req, res, next) {
+router.use("/update/:id", checkUserPermissions, function (req, res, next) {
   next();
 });
 
-router.use("/delete/:id", checkJwt, checkScopes, function (req, res, next) {
+router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
   next();
 });
 
@@ -79,32 +76,30 @@ router.route("/:id").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router
-  .route("/update/:id", upload.single("imageName"), checkJwt)
-  .post((req, res) => {
-    Officer.findById(req.params.id)
-      .then((officer) => {
-        officer.name = req.body.name;
-        officer.title = req.body.title;
-        officer.description = req.body.description;
-        officer.email = req.body.email;
-        imageName = req.body.imageName;
-        if (imageName) {
-          imageDest = uploadFile(req.file.path, imageName);
-          if (imageDest === false) {
-            res.status(400).json("Image upload Error");
-          }
-          officer.imageDest = imageDest;
+router.route("/update/:id", upload.single("imageName")).post((req, res) => {
+  Officer.findById(req.params.id)
+    .then((officer) => {
+      officer.name = req.body.name;
+      officer.title = req.body.title;
+      officer.description = req.body.description;
+      officer.email = req.body.email;
+      imageName = req.body.imageName;
+      if (imageName) {
+        imageDest = uploadFile(req.file.path, imageName);
+        if (imageDest === false) {
+          res.status(400).json("Image upload Error");
         }
-        officer
-          .save()
-          .then(() => res.json("Officer Updated"))
-          .catch((err) => res.status(400).json("Error: " + err));
-      })
-      .catch((err) => res.status(400).json("Error: " + err));
-  });
+        officer.imageDest = imageDest;
+      }
+      officer
+        .save()
+        .then(() => res.json("Officer Updated"))
+        .catch((err) => res.status(400).json("Error: " + err));
+    })
+    .catch((err) => res.status(400).json("Error: " + err));
+});
 
-router.route("/delete/:id", checkJwt).delete((req, res) => {
+router.route("/delete/:id").delete((req, res) => {
   Officer.findByIdAndDelete(req.params.id)
     .then(() => res.json("Officer deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
