@@ -1,4 +1,4 @@
-const User = require("./models/user");
+const User = require("./Users/userModel");
 
 const checkUserPermissions = (req, res, next) => {
   if (req.session.user) {

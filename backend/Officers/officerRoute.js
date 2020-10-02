@@ -1,5 +1,5 @@
 const router = require("express").Router();
-let Officer = require("../models/officer");
+let Officer = require("./officerModel");
 const multer = require("multer");
 const AWS = require("aws-sdk");
 const checkUserPermissions = require("../auth");

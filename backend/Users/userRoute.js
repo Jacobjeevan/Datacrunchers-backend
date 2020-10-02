@@ -1,7 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const router = express.Router();
-const User = require("../models/user");
+const User = require("./userModel");
 const { authenticate } = require("passport");
 
 const isLoggedIn = (req, res, next) => {
@@ -58,6 +58,7 @@ router.get("/logout", (req, res) => {
         })
       );
     }
+    res.clearCookie(process.env.Session_name);
     return res.sendStatus(200);
   });
 });

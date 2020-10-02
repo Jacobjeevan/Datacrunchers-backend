@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Resource = require("../models/resource");
+const Project = require("./projectModel");
 const checkUserPermissions = require("../auth");
 
 router.use("/add", checkUserPermissions, function (req, res, next) {
@@ -15,44 +15,48 @@ router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
 });
 
 router.route("/add").post((req, res) => {
+  const authors = req.body.authors;
   const title = req.body.title;
   const description = req.body.description;
-  const newResource = new Resource({ title, description });
-  newResource
+  const github = req.body.github;
+  const newProject = new Project({ authors, title, description, github });
+  newProject
     .save()
-    .then(() => res.json("Resource Added"))
+    .then(() => res.json("Project Added"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/").get((req, res) => {
-  Resource.find()
-    .then((resources) => res.json(resources))
+router.get("/", function (req, res) {
+  Project.find()
+    .then((projects) => res.json(projects))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
-  Resource.findById(id)
-    .then((resource) => res.json(resource))
-    .catch((err) => res.status(400).json("Resource Fetch Error: " + err));
+  Project.findById(id)
+    .then((project) => res.json(project))
+    .catch((err) => res.status(400).json("Project Fetch Error: " + err));
 });
 
 router.route("/update/:id").post((req, res) => {
-  Resource.findById(req.params.id)
-    .then((resource) => {
-      resource.title = req.body.title;
-      resource.description = req.body.description;
-      resource
+  Project.findById(req.params.id)
+    .then((project) => {
+      project.authors = req.body.authors;
+      project.title = req.body.title;
+      project.description = req.body.description;
+      project.github = req.body.github;
+      project
         .save()
-        .then(() => res.json("Resource Updated"))
+        .then(() => res.json("Project Updated"))
         .catch((err) => res.status(400).json("Error: " + err));
     })
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {
-  Resource.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Resource deleted"))
+  Project.findByIdAndDelete(req.params.id)
+    .then(() => res.json("Project deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 

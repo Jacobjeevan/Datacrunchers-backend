@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Event = require("../models/event");
+const Resource = require("./resourceModel");
 const checkUserPermissions = require("../auth");
 
 router.use("/add", checkUserPermissions, function (req, res, next) {
@@ -17,46 +17,42 @@ router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
 router.route("/add").post((req, res) => {
   const title = req.body.title;
   const description = req.body.description;
-  const location = req.body.location;
-  const date = Date.parse(req.body.date);
-  const newEvent = new Event({ title, description, location, date });
-  newEvent
+  const newResource = new Resource({ title, description });
+  newResource
     .save()
-    .then(() => res.json("Event Added"))
+    .then(() => res.json("Resource Added"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/").get((req, res) => {
-  Event.find()
-    .then((events) => res.json(events))
+  Resource.find()
+    .then((resources) => res.json(resources))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
-  Event.findById(id)
-    .then((event) => res.json(event))
-    .catch((err) => res.status(400).json("Event Fetch Error: " + err));
+  Resource.findById(id)
+    .then((resource) => res.json(resource))
+    .catch((err) => res.status(400).json("Resource Fetch Error: " + err));
 });
 
 router.route("/update/:id").post((req, res) => {
-  Event.findById(req.params.id)
-    .then((event) => {
-      event.title = req.body.title;
-      event.description = req.body.description;
-      event.location = req.body.location;
-      event.date = Date.parse(req.body.date);
-      event
+  Resource.findById(req.params.id)
+    .then((resource) => {
+      resource.title = req.body.title;
+      resource.description = req.body.description;
+      resource
         .save()
-        .then(() => res.json("Event Updated"))
+        .then(() => res.json("Resource Updated"))
         .catch((err) => res.status(400).json("Error: " + err));
     })
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {
-  Event.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Event deleted"))
+  Resource.findByIdAndDelete(req.params.id)
+    .then(() => res.json("Resource deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 

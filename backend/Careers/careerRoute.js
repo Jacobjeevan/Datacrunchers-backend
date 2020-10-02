@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Project = require("../models/project");
+const Career = require("./careerModel");
 const checkUserPermissions = require("../auth");
 
 router.use("/add", checkUserPermissions, function (req, res, next) {
@@ -15,48 +15,44 @@ router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
 });
 
 router.route("/add").post((req, res) => {
-  const authors = req.body.authors;
   const title = req.body.title;
   const description = req.body.description;
-  const github = req.body.github;
-  const newProject = new Project({ authors, title, description, github });
-  newProject
+  const newCareer = new Career({ title, description });
+  newCareer
     .save()
-    .then(() => res.json("Project Added"))
+    .then(() => res.json("Career Added"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.get("/", function (req, res) {
-  Project.find()
-    .then((projects) => res.json(projects))
+router.route("/").get((req, res) => {
+  Career.find()
+    .then((careers) => res.json(careers))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
-  Project.findById(id)
-    .then((project) => res.json(project))
-    .catch((err) => res.status(400).json("Project Fetch Error: " + err));
+  Career.findById(id)
+    .then((career) => res.json(career))
+    .catch((err) => res.status(400).json("Career Fetch Error: " + err));
 });
 
 router.route("/update/:id").post((req, res) => {
-  Project.findById(req.params.id)
-    .then((project) => {
-      project.authors = req.body.authors;
-      project.title = req.body.title;
-      project.description = req.body.description;
-      project.github = req.body.github;
-      project
+  Career.findById(req.params.id)
+    .then((career) => {
+      career.title = req.body.title;
+      career.description = req.body.description;
+      career
         .save()
-        .then(() => res.json("Project Updated"))
+        .then(() => res.json("Career Updated"))
         .catch((err) => res.status(400).json("Error: " + err));
     })
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {
-  Project.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Project deleted"))
+  Career.findByIdAndDelete(req.params.id)
+    .then(() => res.json("Career deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 

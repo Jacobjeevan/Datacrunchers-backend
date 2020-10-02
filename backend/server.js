@@ -5,7 +5,7 @@ const express = require("express"),
   session = require("express-session"),
   passport = require("passport"),
   LocalStrategy = require("passport-local").Strategy,
-  User = require("./models/user");
+  User = require("./Users/userModel");
 
 var MongoDBStore = require("connect-mongodb-session")(session);
 
@@ -15,12 +15,12 @@ if (process.env.NODE_ENV == "PRODUCTION") {
   require("dotenv").config({ path: "./.env.dev" });
 }
 
-const officerRouter = require("./routes/officer");
-const eventRouter = require("./routes/event");
-const projectRouter = require("./routes/project");
-const resourceRouter = require("./routes/resource");
-const careerRouter = require("./routes/career");
-const userRouter = require("./routes/users");
+const officerRouter = require("./Officers/officerRoute");
+const eventRouter = require("./Events/eventRoute");
+const projectRouter = require("./Projects/projectRoute");
+const resourceRouter = require("./Resources/resourceRoute");
+const careerRouter = require("./Careers/careerRoute");
+const userRouter = require("./Users/userRoute");
 
 const app = express();
 const port = process.env.PORT || 5000;

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const Career = require("../models/career");
+const Event = require("./eventModel");
 const checkUserPermissions = require("../auth");
 
 router.use("/add", checkUserPermissions, function (req, res, next) {
@@ -17,42 +17,46 @@ router.use("/delete/:id", checkUserPermissions, function (req, res, next) {
 router.route("/add").post((req, res) => {
   const title = req.body.title;
   const description = req.body.description;
-  const newCareer = new Career({ title, description });
-  newCareer
+  const location = req.body.location;
+  const date = Date.parse(req.body.date);
+  const newEvent = new Event({ title, description, location, date });
+  newEvent
     .save()
-    .then(() => res.json("Career Added"))
+    .then(() => res.json("Event Added"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/").get((req, res) => {
-  Career.find()
-    .then((careers) => res.json(careers))
+  Event.find()
+    .then((events) => res.json(events))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
-  Career.findById(id)
-    .then((career) => res.json(career))
-    .catch((err) => res.status(400).json("Career Fetch Error: " + err));
+  Event.findById(id)
+    .then((event) => res.json(event))
+    .catch((err) => res.status(400).json("Event Fetch Error: " + err));
 });
 
 router.route("/update/:id").post((req, res) => {
-  Career.findById(req.params.id)
-    .then((career) => {
-      career.title = req.body.title;
-      career.description = req.body.description;
-      career
+  Event.findById(req.params.id)
+    .then((event) => {
+      event.title = req.body.title;
+      event.description = req.body.description;
+      event.location = req.body.location;
+      event.date = Date.parse(req.body.date);
+      event
         .save()
-        .then(() => res.json("Career Updated"))
+        .then(() => res.json("Event Updated"))
         .catch((err) => res.status(400).json("Error: " + err));
     })
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {
-  Career.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Career deleted"))
+  Event.findByIdAndDelete(req.params.id)
+    .then(() => res.json("Event deleted"))
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
