@@ -45,7 +45,7 @@ router.post("/add", upload.single("imageName"), (req, res) => {
 
   s3.upload(params, function (err, data) {
     if (err) {
-      return;
+      return res.status(400).json("S3 Upload Error");
     } else {
       const newOfficer = new Officer({
         name: req.body.name,
@@ -56,11 +56,10 @@ router.post("/add", upload.single("imageName"), (req, res) => {
       });
       newOfficer
         .save()
-        .then((res) => res.json("Officer Added"))
-        .catch((err) => res.status(400).json("Officer Save Error: " + err));
+        .then(() => res.json("Officer Added"))
+        .catch((err) => res.json("Officer Save Error: " + err));
     }
   });
-  res.status(400).json("S3 Upload Error");
 });
 
 router.route("/").get((req, res) => {
