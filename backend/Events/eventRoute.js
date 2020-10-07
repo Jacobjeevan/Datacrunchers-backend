@@ -22,8 +22,12 @@ router.route("/add").post((req, res) => {
   const newEvent = new Event({ title, description, location, date });
   newEvent
     .save()
-    .then(() => res.json("Event Added"))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then(() => res.json({ success: true, message: "Event Added" }))
+    .catch((error) =>
+      res
+        .status(400)
+        .json({ success: false, message: `Could not add Event: ${error}` })
+    );
 });
 
 router.route("/").get((req, res) => {
@@ -48,16 +52,30 @@ router.route("/update/:id").post((req, res) => {
       event.date = Date.parse(req.body.date);
       event
         .save()
-        .then(() => res.json("Event Updated"))
-        .catch((err) => res.status(400).json("Error: " + err));
+        .then(() => res.json({ success: true, message: "Event Updated" }))
+        .catch((error) =>
+          res.status(400).json({
+            success: false,
+            message: `Could not update Event: ${error}`,
+          })
+        );
     })
-    .catch((err) => res.status(400).json("Error: " + err));
+    .catch((err) =>
+      res
+        .status(400)
+        .json({ success: false, message: `Could not update Event: ${error}` })
+    );
 });
 
 router.route("/delete/:id").delete((req, res) => {
   Event.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Event deleted"))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then(() => res.json({ success: true, message: "Event Deleted" }))
+    .catch((error) =>
+      res.status(400).json({
+        success: false,
+        message: `Could not delete Event: ${error}`,
+      })
+    );
 });
 
 module.exports = router;
