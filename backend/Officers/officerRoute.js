@@ -75,27 +75,36 @@ router.route("/:id").get((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
-router.route("/update/:id", upload.single("imageName")).post((req, res) => {
-  Officer.findById(req.params.id)
-    .then((officer) => {
-      officer.name = req.body.name;
-      officer.title = req.body.title;
-      officer.description = req.body.description;
-      officer.email = req.body.email;
-      imageName = req.body.imageName;
-      if (imageName) {
-        imageDest = uploadFile(req.file.path, imageName);
-        if (imageDest === false) {
-          res.status(400).json("Image upload Error");
+router.post("/update/:id", upload.single("imageName"), (req, res) => {
+  const file = req.file;
+  let id = req.params.id;
+  console.log(id);
+  var params = {
+    Bucket: process.env.bucketname,
+    Body: file.buffer,
+    Key: file.originalname,
+    ContentType: file.mimetype,
+    ACL: "public-read",
+  };
+  s3.upload(params, function (err, data) {
+    if (err) {
+      return false;
+    } else {
+      console.log(id);
+      Officer.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          name: req.body.name,
+          title: req.body.title,
+          description: req.body.description,
+          email: req.body.email,
+          imageDest: data.Location,
         }
-        officer.imageDest = imageDest;
-      }
-      officer
-        .save()
+      )
         .then(() => res.json("Officer Updated"))
         .catch((err) => res.status(400).json("Error: " + err));
-    })
-    .catch((err) => res.status(400).json("Error: " + err));
+    }
+  });
 });
 
 router.route("/delete/:id").delete((req, res) => {
