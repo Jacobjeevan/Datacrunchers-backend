@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Event = require("./eventModel");
 const checkUserPermissions = require("../auth");
+const { successMessage, errorMessage } = require("../routeMessages");
 
 router.use("/add", checkUserPermissions, function (req, res, next) {
   next();
@@ -22,60 +23,41 @@ router.route("/add").post((req, res) => {
   const newEvent = new Event({ title, description, location, date });
   newEvent
     .save()
-    .then(() => res.json({ success: true, message: "Event Added" }))
-    .catch((error) =>
-      res
-        .status(400)
-        .json({ success: false, message: `Could not add Event: ${error}` })
-    );
+    .then(() => successMessage("Event Added"))
+    .catch((error) => errorMessage(res, `Could not add Event: ${error}`));
 });
 
 router.route("/").get((req, res) => {
   Event.find()
-    .then((events) => res.json(events))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then((events) => res.status(200).json(events))
+    .catch((err) => errorMessage(res, "Events Fetch Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
   Event.findById(id)
-    .then((event) => res.json(event))
-    .catch((err) => res.status(400).json("Event Fetch Error: " + err));
+    .then((event) => res.status(200).json(event))
+    .catch((err) => errorMessage(res, "Event Fetch Error: " + err));
 });
 
 router.route("/update/:id").post((req, res) => {
-  Event.findById(req.params.id)
-    .then((event) => {
-      event.title = req.body.title;
-      event.description = req.body.description;
-      event.location = req.body.location;
-      event.date = Date.parse(req.body.date);
-      event
-        .save()
-        .then(() => res.json({ success: true, message: "Event Updated" }))
-        .catch((error) =>
-          res.status(400).json({
-            success: false,
-            message: `Could not update Event: ${error}`,
-          })
-        );
-    })
-    .catch((err) =>
-      res
-        .status(400)
-        .json({ success: false, message: `Could not update Event: ${error}` })
-    );
+  Event.findByIdAndUpdate(
+    { _id: req.params.id },
+    {
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+      date: Date.parse(req.body.date),
+    }
+  )
+    .then(() => successMessage(res, "Event Updated"))
+    .catch((err) => errorMessage(res, "Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {
   Event.findByIdAndDelete(req.params.id)
-    .then(() => res.json({ success: true, message: "Event Deleted" }))
-    .catch((error) =>
-      res.status(400).json({
-        success: false,
-        message: `Could not delete Event: ${error}`,
-      })
-    );
+    .then(() => successMessage(res, "Event Deleted"))
+    .catch((err) => errorMessage(res, "Error: " + err));
 });
 
 module.exports = router;

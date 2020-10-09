@@ -5,6 +5,7 @@ const AWS = require("aws-sdk");
 const checkUserPermissions = require("../auth");
 require("dotenv").config();
 var upload = multer({ storage: multer.memoryStorage() });
+const { successMessage, errorMessage } = require("../routeMessages");
 
 AWS.config.update({
   accessKeyId: process.env.Access_Key_ID,
@@ -56,23 +57,23 @@ router.post("/add", upload.single("imageName"), (req, res) => {
       });
       newOfficer
         .save()
-        .then(() => res.json("Officer Added"))
-        .catch((err) => res.json("Officer Save Error: " + err));
+        .then(() => successMessage("Officer Added"))
+        .catch((error) => errorMessage(res, `Could not add Officer: ${error}`));
     }
   });
 });
 
 router.route("/").get((req, res) => {
   Officer.find()
-    .then((officers) => res.json(officers))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then((officers) => res.status(200).json(officers))
+    .catch((err) => errorMessage(res, "Officers Fetch Error: " + err));
 });
 
 router.route("/:id").get((req, res) => {
   let id = req.params.id;
   Officer.findById(id)
-    .then((officer) => res.json(officer))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then((officer) => res.status(200).json(officer))
+    .catch((err) => errorMessage(res, "Officer Fetch Error: " + err));
 });
 
 router.post("/update/:id", upload.single("imageName"), (req, res) => {
@@ -90,7 +91,6 @@ router.post("/update/:id", upload.single("imageName"), (req, res) => {
     if (err) {
       return false;
     } else {
-      console.log(id);
       Officer.findByIdAndUpdate(
         { _id: req.params.id },
         {
@@ -101,16 +101,16 @@ router.post("/update/:id", upload.single("imageName"), (req, res) => {
           imageDest: data.Location,
         }
       )
-        .then(() => res.json("Officer Updated"))
-        .catch((err) => res.status(400).json("Error: " + err));
+        .then(() => successMessage(res, "Officer Updated"))
+        .catch((err) => errorMessage(res, "Error: " + err));
     }
   });
 });
 
 router.route("/delete/:id").delete((req, res) => {
   Officer.findByIdAndDelete(req.params.id)
-    .then(() => res.json("Officer deleted"))
-    .catch((err) => res.status(400).json("Error: " + err));
+    .then(() => successMessage(res, "Officer Deleted"))
+    .catch((err) => errorMessage(res, "Error: " + err));
 });
 
 module.exports = router;
