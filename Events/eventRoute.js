@@ -23,7 +23,7 @@ router.route("/add").post((req, res) => {
   const newEvent = new Event({ title, description, location, date });
   newEvent
     .save()
-    .then(() => successMessage("Event Added"))
+    .then(() => successMessage(res, "Event Added"))
     .catch((error) => errorMessage(res, `Could not add Event: ${error}`));
 });
 

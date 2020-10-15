@@ -57,7 +57,7 @@ router.post("/add", upload.single("imageName"), (req, res) => {
       });
       newOfficer
         .save()
-        .then(() => successMessage("Officer Added"))
+        .then(() => successMessage(res, "Officer Added"))
         .catch((error) => errorMessage(res, `Could not add Officer: ${error}`));
     }
   });

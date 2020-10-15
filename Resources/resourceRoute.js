@@ -21,7 +21,7 @@ router.route("/add").post((req, res) => {
   const newResource = new Resource({ title, description });
   newResource
     .save()
-    .then(() => successMessage("Resource Added"))
+    .then(() => successMessage(res, "Resource Added"))
     .catch((error) => errorMessage(res, `Could not add Resource: ${error}`));
 });
 
