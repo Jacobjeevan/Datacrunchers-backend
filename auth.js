@@ -2,7 +2,7 @@ const User = require("./Users/userModel");
 
 const checkUserPermissions = (req, res, next) => {
   if (req.session.user) {
-    let foundUser = User.findById({ _id: req.session.user._id });
+    let foundUser = User.findById({ _id: req.session.user.userId });
     if (foundUser /* && foundUser.Role == "officer" */) {
       return next();
     } else {
