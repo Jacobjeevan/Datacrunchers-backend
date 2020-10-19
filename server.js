@@ -9,10 +9,12 @@ const express = require("express"),
 
 var MongoDBStore = require("connect-mongodb-session")(session);
 
-if (process.env.NODE_ENV == "PRODUCTION") {
+if (process.env.NODE_ENV === "PRODUCTION") {
   require("dotenv").config({ path: "./.env.prod" });
-} else if (process.env.NODE_ENV == "DEV") {
+} else if (process.env.NODE_ENV === "DEV") {
   require("dotenv").config({ path: "./.env.dev" });
+} else if (process.env.NODE_ENV === "TEST") {
+  require("dotenv").config({ path: "./.env.test" });
 }
 
 const officerRouter = require("./Officers/officerRoute");
@@ -97,3 +99,5 @@ connection.once("open", () => {
 app.listen(port, () => {
   console.log(`Server is currently running on the port: ${port}`);
 });
+
+module.exports = app;
