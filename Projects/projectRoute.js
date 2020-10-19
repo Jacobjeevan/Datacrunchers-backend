@@ -23,7 +23,7 @@ router.route("/add").post((req, res) => {
   const newProject = new Project({ authors, title, description, github });
   newProject
     .save()
-    .then(() => successMessage("Project Added"))
+    .then(() => successMessage(res, "Project Added"))
     .catch((error) => errorMessage(res, `Could not add Project: ${error}`));
 });
 

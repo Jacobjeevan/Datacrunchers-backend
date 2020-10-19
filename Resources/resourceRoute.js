@@ -45,9 +45,9 @@ router.route("/update/:id").post((req, res) => {
       title: req.body.title,
       description: req.body.description,
     }
-      .then(() => successMessage(res, "Resource Updated"))
-      .catch((err) => errorMessage(res, "Error: " + err))
-  );
+  )
+    .then(() => successMessage(res, "Resource Updated"))
+    .catch((err) => errorMessage(res, "Error: " + err));
 });
 
 router.route("/delete/:id").delete((req, res) => {

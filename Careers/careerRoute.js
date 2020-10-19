@@ -54,7 +54,7 @@ router.route("/update/:id").post((req, res) => {
 
 router.route("/delete/:id").delete((req, res) => {
   Career.findByIdAndDelete(req.params.id)
-    .then(() => successMessage(res, "Career deleted"))
+    .then(() => successMessage(res, "Career Deleted"))
     .catch((err) => errorMessage(res, "Error: " + err));
 });
 
